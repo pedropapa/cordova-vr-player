@@ -18,11 +18,20 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    NSString *displayMode  =  [self valueForKey:@"displayMode"];
+    
     _videoView.delegate = self;
-    _videoView.enableFullscreenButton = YES;
-    _videoView.enableCardboardButton = YES;
-    _videoView.enableTouchTracking = YES;
-    _videoView.displayMode = kGVRWidgetDisplayModeFullscreen;
+    _videoView.hidesTransitionView = YES;
+    _videoView.enableFullscreenButton = NO;
+    _videoView.enableCardboardButton = NO;
+    _videoView.enableInfoButton = NO;
+    _videoView.enableTouchTracking = NO;
+    
+    if ([displayMode isEqualToString:@"VR"]) {
+        _videoView.displayMode = kGVRWidgetDisplayModeFullscreen;
+    } else {
+        _videoView.displayMode = kGVRWidgetDisplayModeEmbedded;
+    }
     
     self.fallbackVideoPlayed = NO;
     
@@ -38,6 +47,8 @@
 
 - (void)widgetView:(GVRWidgetView *)widgetView didLoadContent:(id)content {
     NSLog(@"Finished loading video");
+    
+    [_videoView play];
 }
 
 - (void)widgetView:(GVRWidgetView *)widgetView
@@ -74,8 +85,7 @@ didFailToLoadContent:(id)content
 - (void)videoView:(GVRVideoView*)videoView didUpdatePosition:(NSTimeInterval)position {
     // Loop the video when it reaches the end.
     if (position == videoView.duration) {
-        [_videoView seekTo:0];
-        [_videoView resume];
+        videoView.displayMode = kGVRWidgetDisplayModeEmbedded;
     }
 }
 
