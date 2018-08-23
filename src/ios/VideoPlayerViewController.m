@@ -27,7 +27,9 @@
     _videoView.enableInfoButton = NO;
     _videoView.enableTouchTracking = NO;
     
-    if ([displayMode isEqualToString:@"VR"]) {
+    if ([displayMode isEqualToString:@"FullscreenVR"]) {
+        _videoView.displayMode = kGVRWidgetDisplayModeFullscreenVR;
+    } else if ([displayMode isEqualToString:@"Fullscreen"]) {
         _videoView.displayMode = kGVRWidgetDisplayModeFullscreen;
     } else {
         _videoView.displayMode = kGVRWidgetDisplayModeEmbedded;
