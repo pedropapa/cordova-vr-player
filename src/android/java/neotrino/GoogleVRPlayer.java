@@ -33,11 +33,13 @@ public class GoogleVRPlayer extends CordovaPlugin {
     if(action.equals("playVideo")) {
       String videoUrl = args.getString(0);
       String fallbackVideoUrl = args.getString(1);
+      String displayMode = args.getString(2);
       Log.d(TAG, videoUrl);
       Context context=this.cordova.getActivity().getApplicationContext();
       Intent intent=new Intent(context, VrVideoActivity.class);     
       intent.putExtra("videoUrl", videoUrl);
       intent.putExtra("fallbackVideoUrl", fallbackVideoUrl);
+      intent.putExtra("displayMode", displayMode);
       intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
       
       context.startActivity(intent);

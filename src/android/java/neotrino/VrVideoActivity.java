@@ -29,6 +29,7 @@ public class VrVideoActivity extends Activity {
 
   /** Tracks the file to be loaded across the lifetime of this app. **/
   private Uri fileUri;
+  private String displayMode;
   private Uri fallbackVideoUri;
 
   /** Configuration information for the video. **/
@@ -55,9 +56,13 @@ public class VrVideoActivity extends Activity {
 
     // Bind input and output objects for the view.
     videoWidgetView = (VrVideoView) findViewById(resources.getIdentifier("video_view", "id", package_name));
-    videoWidgetView.setDisplayMode(VrWidgetView.DisplayMode.FULLSCREEN_MONO);
+
     videoWidgetView.setEventListener(new ActivityEventListener());
     videoWidgetView.setVisibility(View.INVISIBLE);
+    videoWidgetView.setInfoButtonEnabled(false);
+    videoWidgetView.setStereoModeButtonEnabled(false);
+    videoWidgetView.setTouchTrackingEnabled(false);
+    videoWidgetView.setFullscreenButtonEnabled(false);
 
     activity = this;
     // Initial launch of the app or an Activity recreation due to rotation.
@@ -82,7 +87,7 @@ public class VrVideoActivity extends Activity {
   }
 
 
-  private void launchVideoLoader(Uri fileUri) {
+  private void launchVideoLoader(Uri fileUri, String displayMode) {
     // Load the bitmap in a background thread to avoid blocking the UI thread. This operation can
     // take 100s of milliseconds.
     if (backgroundVideoLoaderTask != null) {
@@ -90,6 +95,7 @@ public class VrVideoActivity extends Activity {
       backgroundVideoLoaderTask.cancel(true);
     }
     backgroundVideoLoaderTask = new VideoLoaderTask();
+    backgroundVideoLoaderTask.displayMode = displayMode;
     backgroundVideoLoaderTask.execute(Pair.create(fileUri, videoOptions));
   }
   /**
@@ -100,14 +106,16 @@ public class VrVideoActivity extends Activity {
     Bundle extras = intent.getExtras();
     if (extras != null) {
       fileUri = Uri.parse(extras.getString("videoUrl"));
+      displayMode = extras.getString("displayMode");
       String fallbackVideo = extras.getString("fallbackVideoUrl");
       if (fallbackVideo != null)
         fallbackVideoUri = Uri.parse(fallbackVideo);
     } else {
       fileUri = null;
+      displayMode = null;
     }
 
-    launchVideoLoader(fileUri);
+    launchVideoLoader(fileUri, displayMode);
 
   }
 
@@ -144,6 +152,8 @@ public class VrVideoActivity extends Activity {
     public void onLoadSuccess() {
       Log.i(TAG, "Sucessfully loaded video " + videoWidgetView.getDuration());
       loadVideoStatus = LOAD_VIDEO_STATUS_SUCCESS;
+
+      videoWidgetView.playVideo();
     }
 
     @Override
@@ -162,7 +172,7 @@ public class VrVideoActivity extends Activity {
       //Attempt to load fallback video
       if (!fallbackVideoLoaded){
         fallbackVideoLoaded = true;
-        launchVideoLoader(fallbackVideoUri);
+        launchVideoLoader(fallbackVideoUri, displayMode);
       }else {
         Toast.makeText(
                 VrVideoActivity.this, "Error loading video: " + errorMessage, Toast.LENGTH_LONG)
@@ -194,7 +204,7 @@ public class VrVideoActivity extends Activity {
    */
   class VideoLoaderTask extends AsyncTask<Pair<Uri, Options>, Void, Boolean> {
     Uri fileUri = null;
-
+    String displayMode = null;
 
     @Override
     protected Boolean doInBackground(Pair<Uri, Options>... pairs) {
@@ -205,8 +215,23 @@ public class VrVideoActivity extends Activity {
     @Override
     protected void onPostExecute(Boolean aBoolean) {
       try {
+        System.out.println("TESTE >>>>>> " + displayMode + " " + fileUri);
+
         Options options = new Options();
-        //options.inputType = Options.TYPE_MONO;
+
+        if(displayMode == null) {
+          displayMode = "Fullscreen";
+        }
+
+        if(displayMode.equals("Fullscreen")) {
+          videoWidgetView.setDisplayMode(VrWidgetView.DisplayMode.FULLSCREEN_MONO);
+        } else if(displayMode.equals("FullscreenVR")) {
+          videoWidgetView.setDisplayMode(VrWidgetView.DisplayMode.FULLSCREEN_STEREO);
+          videoWidgetView.setTransitionViewEnabled(false);
+        } else {
+          videoWidgetView.setDisplayMode(VrWidgetView.DisplayMode.EMBEDDED);
+        }
+
         videoWidgetView.loadVideo(fileUri, options);
       } catch (IOException e) {
         // An error here is normally due to being unable to locate the file.
