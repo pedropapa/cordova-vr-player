@@ -60,7 +60,6 @@ public class VrVideoActivity extends Activity {
     videoWidgetView.setEventListener(new ActivityEventListener());
     videoWidgetView.setVisibility(View.INVISIBLE);
     videoWidgetView.setInfoButtonEnabled(false);
-    videoWidgetView.setStereoModeButtonEnabled(false);
     videoWidgetView.setTouchTrackingEnabled(false);
     videoWidgetView.setFullscreenButtonEnabled(false);
 
@@ -136,6 +135,7 @@ public class VrVideoActivity extends Activity {
   @Override
   protected void onDestroy() {
     // Destroy the widget and free memory.
+    videoWidgetView.pauseRendering();
     videoWidgetView.shutdown();
     super.onDestroy();
   }
@@ -159,7 +159,7 @@ public class VrVideoActivity extends Activity {
     @Override
     public void onDisplayModeChanged(int newDisplayMode) {
       if (newDisplayMode != VrWidgetView.DisplayMode.FULLSCREEN_STEREO && newDisplayMode !=  VrWidgetView.DisplayMode.FULLSCREEN_MONO){
-        activity.finish();
+//        activity.finish();
       }
     }
     /**
@@ -189,13 +189,12 @@ public class VrVideoActivity extends Activity {
     public void onNewFrame() {
     }
 
-    /**
-     * Make the video play in a loop. This method could also be used to move to the next video in
-     * a playlist.
-     */
     @Override
     public void onCompletion() {
-      videoWidgetView.seekTo(0);
+      videoWidgetView.pauseRendering();
+      videoWidgetView.shutdown();
+
+      activity.finish();
     }
   }
 
@@ -215,8 +214,6 @@ public class VrVideoActivity extends Activity {
     @Override
     protected void onPostExecute(Boolean aBoolean) {
       try {
-        System.out.println("TESTE >>>>>> " + displayMode + " " + fileUri);
-
         Options options = new Options();
 
         if(displayMode == null) {
@@ -227,10 +224,12 @@ public class VrVideoActivity extends Activity {
           videoWidgetView.setDisplayMode(VrWidgetView.DisplayMode.FULLSCREEN_MONO);
         } else if(displayMode.equals("FullscreenVR")) {
           videoWidgetView.setDisplayMode(VrWidgetView.DisplayMode.FULLSCREEN_STEREO);
-          videoWidgetView.setTransitionViewEnabled(false);
         } else {
           videoWidgetView.setDisplayMode(VrWidgetView.DisplayMode.EMBEDDED);
         }
+
+        videoWidgetView.setTransitionViewEnabled(false);
+        videoWidgetView.setStereoModeButtonEnabled(false);
 
         videoWidgetView.loadVideo(fileUri, options);
       } catch (IOException e) {

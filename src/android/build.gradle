@@ -17,16 +17,26 @@ apply plugin: 'com.android.application'
 
 repositories{    
   jcenter()
-  flatDir {
-      dirs 'libs'
-   }
 }
 
 dependencies {
-    compile(name:'common', ext:'aar')
-    compile(name:'commonwidget', ext:'aar')
-    compile(name:'videowidget', ext:'aar')
+    compile 'com.google.vr:sdk-common:1.160.0'
+    compile 'com.google.vr:sdk-commonwidget:1.160.0'
+    compile 'com.google.vr:sdk-videowidget:1.160.0'
 
     compile 'com.google.android.exoplayer:exoplayer:r1.5.10'
     compile 'com.google.protobuf.nano:protobuf-javanano:3.0.0-alpha-7'
+
+//    configurations {
+//        all*.exclude group: 'com.android.support', module: 'support-v4'
+//    }
 }
+
+//android {
+//    defaultConfig {
+//        multiDexEnabled true
+//    }
+//    dexOptions {
+//        preDexLibraries = false
+//    }
+//}

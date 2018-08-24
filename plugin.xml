@@ -31,9 +31,6 @@
         </activity>
       </config-file>
       <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
-      <resource-file src="src/android/libs/common.aar" target="libs/common.aar" />
-      <resource-file src="src/android/libs/commonwidget.aar" target="libs/commonwidget.aar" />
-      <resource-file src="src/android/libs/videowidget.aar" target="libs/videowidget.aar" />
 
       <source-file src="src/android/java/neotrino/GoogleVRPlayer.java" target-dir="src/com/neotrino/" />
       <source-file src="src/android/java/neotrino/VrVideoActivity.java" target-dir="src/com/neotrino/" />
