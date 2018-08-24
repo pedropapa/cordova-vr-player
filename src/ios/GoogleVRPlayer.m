@@ -11,20 +11,26 @@
     NSString * videoUrl = [command.arguments objectAtIndex:0];
     NSString * fallbackVideoUrl = [command.arguments objectAtIndex:1];
     NSString * displayMode = [command.arguments objectAtIndex:2];
-    
+    NSString * callbackId = command.callbackId;
+    GoogleVRPlayer * googleVRPlayer = self;
+
     // Set the hasPendingOperation field to prevent the webview from crashing
     self.hasPendingOperation = YES;
-    
+
     // Launch the storyboard
     UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
     UIViewController *vc = [sb instantiateViewControllerWithIdentifier:@"videoBoardId"];
-    
+
     [vc setValue:videoUrl forKey:@"videoUrl"];
     [vc setValue:fallbackVideoUrl forKey:@"fallbackVideoUrl"];
     [vc setValue:displayMode forKey:@"displayMode"];
-    
+    [vc setValue:callbackId forKey:@"callbackId"];
+    [vc setValue:googleVRPlayer forKey:@"googleVRPlayer"];
+
     [self.viewController presentViewController:vc animated:YES completion:NULL];
-    
+
 }
+
+
 
 @end
