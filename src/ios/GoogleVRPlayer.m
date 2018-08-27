@@ -34,6 +34,11 @@
     transition.subtype = kCATransitionReveal;
     [self.viewController.view.window.layer addAnimation:transition forKey:nil];
 
+    if (@available(iOS 11.0, *)) {
+        [self.viewController prefersHomeIndicatorAutoHidden];
+        [self.viewController setNeedsUpdateOfHomeIndicatorAutoHidden];
+    }
+
     [self.viewController presentViewController:self.vc animated: NO completion:NULL];
     [self.viewController dismissViewControllerAnimated: NO completion:nil];
 }
@@ -49,7 +54,5 @@
     CATransform3D transform = CATransform3DMakeTranslation(0, 0, 0);
     [self.viewController.view.layer setTransform: transform];
 }
-
-
 
 @end

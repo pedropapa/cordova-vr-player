@@ -45,10 +45,11 @@
     [self loadVideo];
 }
 
--(void)changeDisplayMode:(NSString *)displayMode {
-    NSLog(@"DISPLAY_MODE 2");
-    NSLog(displayMode);
+-(BOOL)prefersHomeIndicatorAutoHidden{
+    return true;
+}
 
+-(void)changeDisplayMode:(NSString *)displayMode {
     if ([displayMode isEqualToString:@"FullscreenVR"]) {
         [_videoView setDisplayMode: kGVRWidgetDisplayModeFullscreenVR];
     } else if ([displayMode isEqualToString:@"Fullscreen"]) {
@@ -133,14 +134,16 @@ didFailToLoadContent:(id)content
         [self sendPluginError:@"CANNOT_DECODE"];
 
         NSURL *videoUrl  = [NSURL URLWithString:videoPath];
-        [_videoView loadFromUrl:videoUrl
-                         ofType:kGVRVideoTypeMono];
+        [_videoView loadFromUrl:videoUrl ofType:kGVRVideoTypeMono];
     }else{
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Failed to load video"
                                                         message:errorMessage
                                                        delegate:nil
                                               cancelButtonTitle:@"OK"
                                               otherButtonTitles:nil];
+
+        [self sendPluginError:errorMessage];
+
         [alert show];
     }
 }
