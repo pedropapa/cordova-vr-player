@@ -27,6 +27,13 @@
     [self.vc setValue:callbackId forKey:@"callbackId"];
     [self.vc setValue:googleVRPlayer forKey:@"googleVRPlayer"];
 
+    CATransition *transition = [CATransition animation];
+    transition.duration = 0;
+    transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+    transition.type = kCATransitionPush;
+    transition.subtype = kCATransitionReveal;
+    [self.viewController.view.window.layer addAnimation:transition forKey:nil];
+
     [self.viewController presentViewController:self.vc animated: NO completion:NULL];
     [self.viewController dismissViewControllerAnimated: NO completion:nil];
 }
@@ -34,11 +41,13 @@
 - (void)playVideo:(CDVInvokedUrlCommand *)command {
     NSString * displayMode = [command.arguments objectAtIndex:0];
 
-    [self.viewController presentViewController:self.vc animated:YES completion:NULL];
+//    [self.viewController presentViewController:self.vc animated:YES completion:NULL];
 
     [(VideoPlayerViewController *) self.vc changeDisplayMode: displayMode];
-
     [(VideoPlayerViewController *) self.vc playVideo];
+
+    CATransform3D transform = CATransform3DMakeTranslation(0, 0, 0);
+    [self.viewController.view.layer setTransform: transform];
 }
 
 
