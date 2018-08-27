@@ -1,4 +1,6 @@
 #import "GoogleVRPlayer.h"
+#import "VideoPlayerViewController.h"
+#import "GVRVideoView.h"
 
 #import <Cordova/CDVAvailability.h>
 
@@ -7,10 +9,9 @@
 - (void)pluginInitialize {
 }
 
-- (void)playVideo:(CDVInvokedUrlCommand *)command {
+- (void)loadVideo:(CDVInvokedUrlCommand *)command {
     NSString * videoUrl = [command.arguments objectAtIndex:0];
     NSString * fallbackVideoUrl = [command.arguments objectAtIndex:1];
-    NSString * displayMode = [command.arguments objectAtIndex:2];
     NSString * callbackId = command.callbackId;
     GoogleVRPlayer * googleVRPlayer = self;
 
@@ -19,16 +20,25 @@
 
     // Launch the storyboard
     UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
-    UIViewController *vc = [sb instantiateViewControllerWithIdentifier:@"videoBoardId"];
+    self.vc = [sb instantiateViewControllerWithIdentifier:@"videoBoardId"];
 
-    [vc setValue:videoUrl forKey:@"videoUrl"];
-    [vc setValue:fallbackVideoUrl forKey:@"fallbackVideoUrl"];
-    [vc setValue:displayMode forKey:@"displayMode"];
-    [vc setValue:callbackId forKey:@"callbackId"];
-    [vc setValue:googleVRPlayer forKey:@"googleVRPlayer"];
+    [self.vc setValue:videoUrl forKey:@"videoUrl"];
+    [self.vc setValue:fallbackVideoUrl forKey:@"fallbackVideoUrl"];
+    [self.vc setValue:callbackId forKey:@"callbackId"];
+    [self.vc setValue:googleVRPlayer forKey:@"googleVRPlayer"];
 
-    [self.viewController presentViewController:vc animated:YES completion:NULL];
+    [self.viewController presentViewController:self.vc animated: NO completion:NULL];
+    [self.viewController dismissViewControllerAnimated: NO completion:nil];
+}
 
+- (void)playVideo:(CDVInvokedUrlCommand *)command {
+    NSString * displayMode = [command.arguments objectAtIndex:0];
+
+    [self.viewController presentViewController:self.vc animated:YES completion:NULL];
+
+    [(VideoPlayerViewController *) self.vc changeDisplayMode: displayMode];
+
+    [(VideoPlayerViewController *) self.vc playVideo];
 }
 
 

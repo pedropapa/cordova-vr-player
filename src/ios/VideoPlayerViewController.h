@@ -11,5 +11,9 @@
 @property (nonatomic, strong) CDVPlugin* googleVRPlayer;
 -(void)sendPluginInformation:(NSString*) message;
 -(void)sendPluginInformation:(NSString*)message andDuration:(NSTimeInterval)duration;
+-(void)sendPluginError:(NSString*) message;
+-(void)changeDisplayMode:(NSString*) displayMode;
+-(void)loadVideo;
+-(void)playVideo;
 
 @end

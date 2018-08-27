@@ -30,6 +30,10 @@
     _videoView.enableInfoButton = NO;
     _videoView.enableTouchTracking = NO;
 
+    self.fallbackVideoPlayed = NO;
+
+    [self sendPluginInformation:@"START_LOADING"];
+
     if ([displayMode isEqualToString:@"FullscreenVR"]) {
         _videoView.displayMode = kGVRWidgetDisplayModeFullscreenVR;
     } else if ([displayMode isEqualToString:@"Fullscreen"]) {
@@ -38,16 +42,36 @@
         _videoView.displayMode = kGVRWidgetDisplayModeEmbedded;
     }
 
-    self.fallbackVideoPlayed = NO;
+    [self loadVideo];
+}
 
-    NSString *videoPath  =  [self valueForKey:@"videoUrl"];
+-(void)changeDisplayMode:(NSString *)displayMode {
+    NSLog(@"DISPLAY_MODE 2");
+    NSLog(displayMode);
 
-    NSURL *videoUrl  = [NSURL URLWithString:videoPath];
+    if ([displayMode isEqualToString:@"FullscreenVR"]) {
+        [_videoView setDisplayMode: kGVRWidgetDisplayModeFullscreenVR];
+    } else if ([displayMode isEqualToString:@"Fullscreen"]) {
+        [_videoView setDisplayMode: kGVRWidgetDisplayModeFullscreen];
+    } else {
+        [_videoView setDisplayMode: kGVRWidgetDisplayModeEmbedded];
+    }
+}
 
-    [self sendPluginInformation:@"START_LOADING"];
+-(void)playVideo {
+    [self sendPluginInformation:@"START_PLAYING"];
 
-    [_videoView loadFromUrl:videoUrl
-                     ofType:kGVRVideoTypeMono];
+//    [_videoView setDisplayMode: kGVRWidgetDisplayModeFullscreen];
+
+    [_videoView play];
+}
+
+-(void)loadVideo {
+    NSString *videoPath  =  self.videoUrl;
+
+    NSURL *videoUri  = [NSURL URLWithString:videoPath];
+
+    [_videoView loadFromUrl:videoUri ofType:kGVRVideoTypeMono];
 }
 
 -(void)sendPluginInformation:(NSString *)message {
@@ -74,16 +98,18 @@
     [self.googleVRPlayer.commandDelegate sendPluginResult:result callbackId:self.callbackId];
 }
 
+-(void)sendPluginError:(NSString *)message {
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString: message];
+    [result setKeepCallbackAsBool:YES];
+    [self.googleVRPlayer.commandDelegate sendPluginResult:result callbackId:self.callbackId];
+}
+
 #pragma mark - GVRVideoViewDelegate
 
 - (void)widgetView:(GVRWidgetView *)widgetView didLoadContent:(id)content {
     NSLog(@"Finished loading video");
 
     [self sendPluginInformation:@"FINISHED_LOADING"];
-
-    [self sendPluginInformation:@"START_PLAYING"];
-
-    [_videoView play];
 }
 
 - (void)widgetView:(GVRWidgetView *)widgetView
@@ -103,6 +129,8 @@ didFailToLoadContent:(id)content
 
     if (!([videoPath isEqual:[NSNull null]]) && ([errorMessage isEqualToString:@"Cannot Decode"] || self.fallbackVideoPlayed == NO)){
         self.fallbackVideoPlayed = YES;
+
+        [self sendPluginError:@"CANNOT_DECODE"];
 
         NSURL *videoUrl  = [NSURL URLWithString:videoPath];
         [_videoView loadFromUrl:videoUrl
