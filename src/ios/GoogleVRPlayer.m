@@ -12,6 +12,7 @@
 - (void)loadVideo:(CDVInvokedUrlCommand *)command {
     NSString * videoUrl = [command.arguments objectAtIndex:0];
     NSString * fallbackVideoUrl = [command.arguments objectAtIndex:1];
+    NSString * videoType = [command.arguments objectAtIndex:2];
     NSString * callbackId = command.callbackId;
     GoogleVRPlayer * googleVRPlayer = self;
 
@@ -25,6 +26,7 @@
     [self.vc setValue:videoUrl forKey:@"videoUrl"];
     [self.vc setValue:fallbackVideoUrl forKey:@"fallbackVideoUrl"];
     [self.vc setValue:callbackId forKey:@"callbackId"];
+    [self.vc setValue:videoType forKey:@"videoType"];
     [self.vc setValue:googleVRPlayer forKey:@"googleVRPlayer"];
 
     CATransition *transition = [CATransition animation];

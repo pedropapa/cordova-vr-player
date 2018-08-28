@@ -72,7 +72,18 @@
 
     NSURL *videoUri  = [NSURL URLWithString:videoPath];
 
-    [_videoView loadFromUrl:videoUri ofType:kGVRVideoTypeMono];
+    int videoType;
+    if ([self.videoType isEqualToString:@"MONO"]) {
+        videoType = kGVRVideoTypeMono;
+    } else if ([self.videoType isEqualToString:@"STEREO"]) {
+        videoType = kGVRVideoTypeStereoOverUnder;
+    } else if ([self.videoType isEqualToString:@"SPHERICAL2"]) {
+        videoType = kGVRVideoTypeSphericalV2;
+    } else {
+        videoType = kGVRVideoTypeMono;
+    }
+
+    [_videoView loadFromUrl:videoUri ofType: videoType];
 }
 
 -(void)sendPluginInformation:(NSString *)message {
