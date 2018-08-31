@@ -34,8 +34,6 @@ public class GoogleVRPlayer extends CordovaPlugin {
    **/
   private Uri fileUri;
   private Uri fallbackVideoUri;
-  private boolean readyToPlay = false;
-  private boolean playVideo = false;
 
   /**
    * Configuration information for the video.
@@ -58,15 +56,6 @@ public class GoogleVRPlayer extends CordovaPlugin {
     videoView.setTransitionViewEnabled(false);
     videoView.setFullscreenButtonEnabled(false);
 
-    videoView.fullScreenDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-      @Override
-      public void onDismiss(DialogInterface dialog) {
-        Log.i(TAG, "Fullscreen closed " + videoView.getCurrentPosition());
-
-        finish();
-      }
-    });
-
     Log.d(TAG, "Initializing GoogleVRPlayer");
   }
 
@@ -84,7 +73,6 @@ public class GoogleVRPlayer extends CordovaPlugin {
     videoView.pauseVideo();
     videoView.setVisibility(View.INVISIBLE);
     videoView.pauseRendering();
-    videoView.shutdown();
   }
 
   public void sendPluginInformation(String message, long duration) {
@@ -138,7 +126,6 @@ public class GoogleVRPlayer extends CordovaPlugin {
     }
 
     if (action.equals("playVideo")) {
-      playVideo = true;
       final String displayMode = args.getString(0);
 
       cordova.getActivity().runOnUiThread(new Runnable() {
@@ -187,14 +174,18 @@ public class GoogleVRPlayer extends CordovaPlugin {
     public void onLoadSuccess() {
       sendPluginInformation("FINISHED_LOADING");
 
+      videoView.pauseVideo();
+
       Log.i(TAG, "Sucessfully loaded video ");
       loadVideoStatus = LOAD_VIDEO_STATUS_SUCCESS;
     }
 
     @Override
     public void onDisplayModeChanged(int newDisplayMode) {
+      Log.i(TAG, "onDisplayModeChanged " + newDisplayMode);
+
       if (newDisplayMode != VrWidgetView.DisplayMode.FULLSCREEN_STEREO && newDisplayMode != VrWidgetView.DisplayMode.FULLSCREEN_MONO) {
-        videoView.pauseVideo();
+        finish();
       }
     }
 
@@ -224,16 +215,7 @@ public class GoogleVRPlayer extends CordovaPlugin {
      */
     @Override
     public void onNewFrame() {
-      if (!readyToPlay) {
-        sendPluginInformation("READY_TO_PLAY");
-        readyToPlay = true;
-      } else {
-        sendPluginInformation("DURATION_UPDATE", videoView.getCurrentPosition());
-      }
-
-      if (!playVideo) {
-        videoView.pauseVideo();
-      }
+      sendPluginInformation("DURATION_UPDATE", videoView.getCurrentPosition());
     }
 
     /**
