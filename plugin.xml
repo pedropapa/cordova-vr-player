@@ -24,11 +24,6 @@
         </feature>
       </config-file>
       <config-file target="AndroidManifest.xml" parent="/manifest/application">
-        <activity android:name="com.neotrino.VrVideoActivity">
-            <intent-filter>
-                <action android:name="PLAY_VR_VIDEO" />
-            </intent-filter>
-        </activity>
       </config-file>
       <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
 
