@@ -41,20 +41,16 @@
         [self.viewController setNeedsUpdateOfHomeIndicatorAutoHidden];
     }
 
-    [self.viewController presentViewController:self.vc animated: NO completion:NULL];
-    [self.viewController dismissViewControllerAnimated: NO completion:nil];
+    [self.viewController presentViewController:self.vc animated:YES completion:NULL];
 }
 
 - (void)playVideo:(CDVInvokedUrlCommand *)command {
     NSString * displayMode = [command.arguments objectAtIndex:0];
 
-//    [self.viewController presentViewController:self.vc animated:YES completion:NULL];
+    [self.viewController presentViewController:self.vc animated:YES completion:NULL];
 
     [(VideoPlayerViewController *) self.vc changeDisplayMode: displayMode];
     [(VideoPlayerViewController *) self.vc playVideo];
-
-    CATransform3D transform = CATransform3DMakeTranslation(0, 0, 0);
-    [self.viewController.view.layer setTransform: transform];
 }
 
 @end

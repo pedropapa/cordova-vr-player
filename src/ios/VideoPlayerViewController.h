@@ -10,8 +10,9 @@
 @property (nonatomic, strong) NSString* callbackId;
 @property (nonatomic, strong) NSString* videoType;
 @property (nonatomic, strong) CDVPlugin* googleVRPlayer;
+@property (nonatomic, strong) NSString* status;
 -(void)sendPluginInformation:(NSString*) message;
--(void)sendPluginInformation:(NSString*)message andDuration:(NSTimeInterval)duration;
+-(void)sendPluginInformation:(NSString*) message andDuration:(NSTimeInterval)duration;
 -(void)sendPluginError:(NSString*) message;
 -(void)changeDisplayMode:(NSString*) displayMode;
 -(void)loadVideo;

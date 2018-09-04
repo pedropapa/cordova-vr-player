@@ -42,6 +42,8 @@
         _videoView.displayMode = kGVRWidgetDisplayModeEmbedded;
     }
 
+    self.status = @"LOADING";
+
     [self loadVideo];
 }
 
@@ -60,11 +62,14 @@
 }
 
 -(void)playVideo {
-    [self sendPluginInformation:@"START_PLAYING"];
-
 //    [_videoView setDisplayMode: kGVRWidgetDisplayModeFullscreen];
 
-    [_videoView play];
+    if([self.status isEqualToString:@"READY_TO_PLAY"]) {
+        [self sendPluginInformation:@"START_PLAYING"];
+        [_videoView play];
+    } else {
+        self.status = @"TO_PLAY";
+    }
 }
 
 -(void)loadVideo {
@@ -120,6 +125,15 @@
 
 - (void)widgetView:(GVRWidgetView *)widgetView didLoadContent:(id)content {
     NSLog(@"Finished loading video");
+
+    if([self.status isEqualToString:@"TO_PLAY"]) {
+        self.status = @"READY_TO_PLAY";
+        [self playVideo];
+    } else {
+        self.status = @"READY_TO_PLAY";
+    }
+
+    [self dismissViewControllerAnimated:NO completion:NULL];
 
     [self sendPluginInformation:@"FINISHED_LOADING"];
 }
