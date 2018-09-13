@@ -27,7 +27,11 @@ public class GoogleVRPlayer extends CordovaPlugin {
   public static final int LOAD_VIDEO_STATUS_SUCCESS = 1;
   public static final int LOAD_VIDEO_STATUS_ERROR = 2;
 
+  public static final int PLAY_VIDEO_STATUS_UNKNOWN = 0;
+  public static final int PLAY_VIDEO_STATUS_PLAYING = 1;
+
   private int loadVideoStatus = LOAD_VIDEO_STATUS_UNKNOWN;
+  private int playVideoStatus = PLAY_VIDEO_STATUS_UNKNOWN;
 
   /**
    * Tracks the file to be loaded across the lifetime of this app.
@@ -70,8 +74,10 @@ public class GoogleVRPlayer extends CordovaPlugin {
   }
 
   public void finish() {
+    Log.d(TAG, "FINISH PLAYING");
     videoView.pauseVideo();
     videoView.setVisibility(View.INVISIBLE);
+    videoView.setDisplayMode(VrWidgetView.DisplayMode.EMBEDDED);
     videoView.pauseRendering();
   }
 
@@ -145,6 +151,8 @@ public class GoogleVRPlayer extends CordovaPlugin {
             videoView.setDisplayMode(VrWidgetView.DisplayMode.FULLSCREEN_MONO);
           }
 
+          playVideoStatus = PLAY_VIDEO_STATUS_PLAYING;
+          videoView.seekTo(0);
           videoView.playVideo();
         }
       });
@@ -174,7 +182,9 @@ public class GoogleVRPlayer extends CordovaPlugin {
     public void onLoadSuccess() {
       sendPluginInformation("FINISHED_LOADING");
 
-      videoView.pauseVideo();
+      if(playVideoStatus != PLAY_VIDEO_STATUS_PLAYING) {
+        videoView.pauseVideo();
+      }
 
       Log.i(TAG, "Sucessfully loaded video ");
       loadVideoStatus = LOAD_VIDEO_STATUS_SUCCESS;
@@ -202,9 +212,9 @@ public class GoogleVRPlayer extends CordovaPlugin {
         fallbackVideoLoaded = true;
         launchVideoLoader(fallbackVideoUri);
       } else {
-        Toast.makeText(
-                cordova.getActivity(), "Error loading video: " + errorMessage, Toast.LENGTH_LONG)
-                .show();
+//                Toast.makeText(
+//                        cordova.getActivity(), "Error loading video: " + errorMessage, Toast.LENGTH_LONG)
+//                        .show();
       }
       Log.e(TAG, "Error loading video: " + errorMessage);
     }
@@ -247,11 +257,14 @@ public class GoogleVRPlayer extends CordovaPlugin {
     @Override
     protected void onPostExecute(Boolean aBoolean) {
       try {
+        Log.i(TAG, "onPostExecute");
+
         videoView.setEventListener(new GoogleVRPlayer.ActivityEventListener());
         videoView.loadVideo(fileUri, videoOptions);
 
         sendPluginInformation("START_LOADING");
       } catch (IOException e) {
+        Log.i(TAG, "onPostExecute CANNOT_DECODE");
         sendPluginError("CANNOT_DECODE");
 
         // An error here is normally due to being unable to locate the file.
@@ -260,9 +273,9 @@ public class GoogleVRPlayer extends CordovaPlugin {
         videoView.post(new Runnable() {
           @Override
           public void run() {
-            Toast
-                    .makeText(cordova.getActivity(), "Error opening file. ", Toast.LENGTH_LONG)
-                    .show();
+//                        Toast
+//                                .makeText(cordova.getActivity(), "Error opening file. ", Toast.LENGTH_LONG)
+//                                .show();
           }
         });
         Log.e(TAG, "Could not open video: " + e);
