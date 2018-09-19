@@ -176,7 +176,6 @@ didFailToLoadContent:(id)content
 }
 
 - (void) showLoader {
-    NSLog(@">> showLoader");
     if ([self.displayMode isEqualToString:@"FullscreenVR"]) {
         [self.stereoActivityIndicatorView1 startAnimating];
         [self.stereoActivityIndicatorView2 startAnimating];
@@ -186,7 +185,6 @@ didFailToLoadContent:(id)content
 }
 
 - (void) hideLoader {
-    NSLog(@">>>>>> hideLoader");
     if ([self.displayMode isEqualToString:@"FullscreenVR"]) {
         [self.stereoActivityIndicatorView1 stopAnimating];
         [self.stereoActivityIndicatorView2 stopAnimating];
