@@ -53,5 +53,6 @@
         <resource-file src="src/ios/Main.storyboard"  />
         
         <pod id="GVRSDK" version="1.140.0" />
+        <pod id="DGActivityIndicatorView" version="2.1.1" />
     </platform>
 </plugin>

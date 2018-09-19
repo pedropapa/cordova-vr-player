@@ -5,6 +5,8 @@
 #import "GVRVideoView.h"
 #import <objc/runtime.h>
 
+#import <DGActivityIndicatorView.h>
+
 @interface VideoPlayerViewController () <GVRVideoViewDelegate>
 @property (unsafe_unretained, nonatomic) IBOutlet GVRVideoView *videoView;
 @end
@@ -42,7 +44,27 @@
         _videoView.displayMode = kGVRWidgetDisplayModeEmbedded;
     }
 
-    self.status = @"LOADING";
+    self.displayMode = displayMode;
+
+    CGFloat width =  80;
+    CGFloat height = 80;
+
+    UIWindow *window = [[UIApplication sharedApplication] keyWindow];
+    UIView *topView = window.rootViewController.view;
+
+    self.monoActivityIndicatorView = [[DGActivityIndicatorView alloc] initWithType:(DGActivityIndicatorAnimationType)[@(DGActivityIndicatorAnimationTypeBallClipRotate) integerValue] tintColor:[UIColor grayColor]];
+    self.monoActivityIndicatorView.frame = CGRectMake((topView.frame.size.height / 2) - (width / 2), (topView.frame.size.width / 2) - (height / 2), width, height);
+    [topView addSubview:self.monoActivityIndicatorView];
+
+    self.stereoActivityIndicatorView1 = [[DGActivityIndicatorView alloc] initWithType:(DGActivityIndicatorAnimationType)[@(DGActivityIndicatorAnimationTypeBallClipRotate) integerValue] tintColor:[UIColor grayColor]];
+    self.stereoActivityIndicatorView1.frame = CGRectMake((topView.frame.size.height / 4) - (width / 2), (topView.frame.size.width / 2) - (height / 2), width, height);
+    [topView addSubview:self.stereoActivityIndicatorView1];
+
+    self.stereoActivityIndicatorView2 = [[DGActivityIndicatorView alloc] initWithType:(DGActivityIndicatorAnimationType)[@(DGActivityIndicatorAnimationTypeBallClipRotate) integerValue] tintColor:[UIColor grayColor]];
+    self.stereoActivityIndicatorView2.frame = CGRectMake((topView.frame.size.height * 0.75) - (width / 2), (topView.frame.size.width / 2) - (height / 2), width, height);
+    [topView addSubview:self.stereoActivityIndicatorView2];
+
+    [self showLoader];
 
     [self loadVideo];
 }
@@ -51,25 +73,11 @@
     return true;
 }
 
--(void)changeDisplayMode:(NSString *)displayMode {
-    if ([displayMode isEqualToString:@"FullscreenVR"]) {
-        [_videoView setDisplayMode: kGVRWidgetDisplayModeFullscreenVR];
-    } else if ([displayMode isEqualToString:@"Fullscreen"]) {
-        [_videoView setDisplayMode: kGVRWidgetDisplayModeFullscreen];
-    } else {
-        [_videoView setDisplayMode: kGVRWidgetDisplayModeEmbedded];
-    }
-}
-
 -(void)playVideo {
-//    [_videoView setDisplayMode: kGVRWidgetDisplayModeFullscreen];
+    [self sendPluginInformation:@"START_PLAYING"];
 
-    if([self.status isEqualToString:@"READY_TO_PLAY"]) {
-        [self sendPluginInformation:@"START_PLAYING"];
-        [_videoView play];
-    } else {
-        self.status = @"TO_PLAY";
-    }
+    [_videoView seekTo: 0];
+    [_videoView play];
 }
 
 -(void)loadVideo {
@@ -126,22 +134,16 @@
 - (void)widgetView:(GVRWidgetView *)widgetView didLoadContent:(id)content {
     NSLog(@"Finished loading video");
 
-    if([self.status isEqualToString:@"TO_PLAY"]) {
-        self.status = @"READY_TO_PLAY";
-        [self playVideo];
-    } else {
-        self.status = @"READY_TO_PLAY";
-    }
-
-    [self dismissViewControllerAnimated:NO completion:NULL];
-
     [self sendPluginInformation:@"FINISHED_LOADING"];
+
+    [self playVideo];
 }
 
 - (void)widgetView:(GVRWidgetView *)widgetView
 didChangeDisplayMode:(GVRWidgetDisplayMode)displayMode{
     if (displayMode != kGVRWidgetDisplayModeFullscreen && displayMode != kGVRWidgetDisplayModeFullscreenVR){
         // Full screen closed, closing the view
+        [_videoView stop];
         [self dismissViewControllerAnimated:YES completion:nil];
     }
 }
@@ -173,8 +175,42 @@ didFailToLoadContent:(id)content
     }
 }
 
+- (void) showLoader {
+    NSLog(@">> showLoader");
+    if ([self.displayMode isEqualToString:@"FullscreenVR"]) {
+        [self.stereoActivityIndicatorView1 startAnimating];
+        [self.stereoActivityIndicatorView2 startAnimating];
+    } else if ([self.displayMode isEqualToString:@"Fullscreen"]) {
+        [self.monoActivityIndicatorView startAnimating];
+    }
+}
+
+- (void) hideLoader {
+    NSLog(@">>>>>> hideLoader");
+    if ([self.displayMode isEqualToString:@"FullscreenVR"]) {
+        [self.stereoActivityIndicatorView1 stopAnimating];
+        [self.stereoActivityIndicatorView2 stopAnimating];
+    } else if ([self.displayMode isEqualToString:@"Fullscreen"]) {
+        [self.monoActivityIndicatorView stopAnimating];
+    }
+}
+
 - (void)videoView:(GVRVideoView*)videoView didUpdatePosition:(NSTimeInterval)position {
     [self sendPluginInformation:@"DURATION_UPDATE" andDuration:position];
+
+    if(self.timer != nil) {
+        [self.timer invalidate];
+    }
+
+    self.timer = nil;
+
+    [self hideLoader];
+
+    self.timer = [NSTimer scheduledTimerWithTimeInterval:0.2
+                                             target:self
+                                           selector:@selector(showLoader)
+                                           userInfo:nil
+                                            repeats:NO];
 
     if (position == videoView.duration) {
         [self sendPluginInformation:@"FINISHED_PLAYING"];
