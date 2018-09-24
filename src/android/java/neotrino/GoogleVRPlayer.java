@@ -24,6 +24,8 @@ public class GoogleVRPlayer extends CordovaPlugin {
   }
 
   public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
+      GoogleVRPlayer.callbackContext = callbackContext;
+
     if(action.equals("playVideo")) {
       String videoUrl = args.getString(0);
       String fallbackVideoUrl = args.getString(1);

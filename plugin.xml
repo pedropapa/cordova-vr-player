@@ -24,6 +24,7 @@
         </feature>
       </config-file>
       <config-file target="AndroidManifest.xml" parent="/manifest/application">
+          <uses-feature name="android.hardware.sensor.gyroscope" required="true" />
       </config-file>
       <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
 
