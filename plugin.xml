@@ -28,6 +28,7 @@
       <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
 
       <source-file src="src/android/java/neotrino/GoogleVRPlayer.java" target-dir="src/com/neotrino/" />
+      <source-file src="src/android/java/neotrino/VrVideoActivity.java" target-dir="src/com/neotrino/" />
 
       <source-file src="src/android/res/layout/main_layout.xml" target-dir="res/layout" />
 
